@@ -6,5 +6,8 @@ module.exports = {
       global: 'conflate',
       externals: {}
     }
-  }
+  },
+  babel: {
+    presets: ['flow']
+  },
 }
