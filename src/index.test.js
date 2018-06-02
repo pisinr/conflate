@@ -72,8 +72,16 @@ describe('conflate', () => {
     'color.highlight': ref('color.accent'),
     'color.wow': ref('color.highlight'),
 
+    ref: {
+      nested: {
+        value: 'v',
+        ref: ref('color.primary'),
+      },
+    },
+
     'ref-first': ref('first-undefined'),
     'ref-object': ref('object-plain'),
+    'ref-nested': ref('ref.nested.value'),
 
     'first-undefined': first(undefined, 1),
     'first-null': first(null, 1),
@@ -108,8 +116,13 @@ describe('conflate', () => {
 
     'object-complex-1': object({a: 0}, ref('object-plain-list-1'), {d: 4}),
     'object-complex-2': object({a: 0}, ref('unknow'), object({a: 1, b: 2, c: ref('color.wow')})),
+    'object.dotted': object({a: 0, b: ref('object-complex-1') }),
 
-
+    nested: {
+      object: {
+        path: ref('object.dotted')
+      }
+    }
   }
 
   describe('argument validation', () => {
@@ -131,6 +144,11 @@ describe('conflate', () => {
     let variables = {
       'color.primary': 'blue',
       'color.secondary': 'red',
+      color: {
+        nested: {
+          lookup: 'val'
+        }
+      }
     }
     let maps;
 
@@ -140,6 +158,12 @@ describe('conflate', () => {
     it('can lookup by key', ()=> {
       expect(maps('color.primary')).toEqual('blue')
       expect(maps('color.secondary')).toEqual('red')
+    })
+    it('can lookup into nested path', ()=> {
+      expect(maps('color.nested.lookup')).toEqual('val')
+    })
+    it('can lookup into nested path of nested refs', ()=> {
+      expect(maps('color.nested.lookup')).toEqual('val')
     })
     it('returns `undefined` for invalid keys', ()=> {
       expect(maps('a')).toBeUndefined()
@@ -175,6 +199,10 @@ describe('conflate', () => {
     })
     it('can follow ref to the target value', ()=> {
       expect(maps('color.accent')).toEqual('red')
+      expect(maps('ref-nested')).toEqual('v')
+    })
+    it('can follow ref inside nested path', ()=> {
+      expect(maps('ref.nested.ref')).toEqual('blue')
     })
     it('return `undefined` on unknow key', ()=> {
       expect(maps('color.none')).toBeUndefined()
@@ -241,6 +269,9 @@ describe('conflate', () => {
         b: 'thing',
       })
     })
+    it('can follow nested path with ref in between', ()=> {
+      expect(maps('nested.object.path.b.c')).toEqual(3)
+    })
     it('supports complex combinations', ()=> {
       expect(maps('object-complex-1')).toEqual({
         a: 0, b: 2, c: 3, d: 4
@@ -250,6 +281,4 @@ describe('conflate', () => {
       })
     })
   })
-
 })
-

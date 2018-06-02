@@ -14,3 +14,7 @@ Describe conflate here.
 
 [coveralls-badge]: https://img.shields.io/coveralls/user/repo/master.png?style=flat-square
 [coveralls]: https://coveralls.io/github/user/repo
+
+# What is this useful for.
+This library was created initially for my theme library.
+When

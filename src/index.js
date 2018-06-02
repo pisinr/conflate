@@ -19,6 +19,7 @@ type CFirstType = {
 }
 
 export function ref(name: string): CRefType {
+  console.assert(typeof name == 'string');
   return {
     type: refType,
     name: name,
@@ -110,8 +111,21 @@ function resolveValue(variables, val_or_ref) {
   }
 
   if (isVarRef(val_or_ref)) {
-    // console.log('  isVarRef:', val_or_ref.name)
-    return resolveValue(variables, variables[val_or_ref.name])
+    let context = variables;
+    const paths = val_or_ref.name.split('.')
+    let accpaths = [];
+    let pathValue;
+    let lastContextPathIndex = _.findIndex(paths, (path) => {
+      accpaths = [...accpaths, path]
+      pathValue = _.get(context, accpaths.join('.'))
+      if (pathValue === undefined) { return; }
+      if (isVarRef(pathValue) || isVarFirst(pathValue) || isVarObject(pathValue)) {
+        context = resolveValue(variables, pathValue)
+        accpaths = []
+        pathValue = pathValue
+      }
+    });
+    return resolveValue(variables, pathValue)
   }
 
   if (_.isObject(val_or_ref)) {
@@ -120,14 +134,15 @@ function resolveValue(variables, val_or_ref) {
   return val_or_ref
 }
 
-export default function conflate(variables) {
+export default function conflate(variables: any) {
   if (!_.isPlainObject(variables)) {
     throw new Error('variables must be an Object')
   }
-  function conflateMap(key) {
-    let val_or_ref = variables[key]
+  function conflateMap(key: string) {
+    // console.log('conflateMap:', key)
+    let val_or_ref = ref(key)
     return resolveValue(variables, val_or_ref);
   }
 
-return conflateMap
+  return conflateMap
 }

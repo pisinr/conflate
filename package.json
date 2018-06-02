@@ -1,6 +1,6 @@
 {
-  "name": "conflate",
-  "version": "0.1.0",
+  "name": "@pisinr/conflate",
+  "version": "0.2.0",
   "description": "Describe conflate here",
   "main": "lib/index.js",
   "module": "es/index.js",
